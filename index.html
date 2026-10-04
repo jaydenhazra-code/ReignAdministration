@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration Portal — Complete Edition</title>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;800&display=swap');
+
+        :root {
+            --bg-base: #060913;
+            --accent-cyan: #38bdf8;
+            --accent-cyan-glow: rgba(56, 189, 248, 0.35);
+            --accent-gold: #f59e0b;
+            --accent-gold-glow: rgba(245, 158, 11, 0.35);
+            --accent-purple: #c084fc;
+            --accent-purple-glow: rgba(192, 132, 252, 0.35);
+            --accent-emerald: #10b981;
+            --accent-emerald-glow: rgba(16, 185, 129, 0.35);
+            --accent-red: #f43f5e;
+            --accent-red-glow: rgba(244, 63, 94, 0.35);
+            --glass-bg: rgba(15, 23, 42, 0.78);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --input-bg: rgba(8, 14, 28, 0.85);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+            padding: 24px 12px;
+        }
+
+        /* Ambient Background Glowing Accents */
+        .ambient-glow {
+            position: fixed;
+            width: 650px;
+            height: 650px;
+            border-radius: 50%;
+            filter: blur(140px);
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.45;
+            animation: floatGlow 14s infinite alternate ease-in-out;
+        }
+
+        .glow-1 {
+            top: -20%;
+            left: -15%;
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.35) 0%, transparent 70%);
+        }
+
+        .glow-2 {
+            bottom: -20%;
+            right: -15%;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.3) 0%, transparent 70%);
+            animation-delay: -7s;
+        }
+
+        @keyframes floatGlow {
+            0% { transform: translate(0, 0) scale(1); opacity: 0.35; }
+            100% { transform: translate(40px, -30px) scale(1.15); opacity: 0.6; }
+        }
+
+        /* Subtle Grid Pattern Overlay */
+        .bg-grid {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 48px 48px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* View Controllers */
+        .view {
+            display: none;
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            padding: 12px;
+        }
+
+        .view.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card-wrapper { width: 100%; max-width: 460px; }
+        .dashboard-wrapper { width: 100%; max-width: 900px; }
+        .form-wrapper { width: 100%; max-width: 820px; }
+        .output-wrapper { width: 100%; max-width: 920px; }
+
+        /* Glassmorphism Cards */
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 38px 34px;
+            box-shadow: 
+                0 25px 70px rgba(0, 0, 0, 0.75),
+                inset 0 1px 1px rgba(255, 255, 255, 0.12);
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            animation: cardEntrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+        }
+
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: translateY(24px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Icon Container */
+        .icon-container {
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+
+        .icon-box {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(56, 189, 248, 0.1) 100%);
+            border: 1px solid rgba(168, 85, 247, 0.35);
+            border-radius: 22px;
+            width: 72px;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Text Headers */
+        .header-text {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .subtitle {
+            color: var(--accent-cyan);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .subtitle-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--accent-cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        .title {
+            font-size: 27px;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+        }
+
+        .description {
+            color: var(--text-muted);
+            font-size: 13.5px;
+            line-height: 1.55;
+        }
+
+        /* Form Controls */
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #d1d5db;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 16px;
+            color: #6b7280;
+            width: 18px;
+            height: 18px;
+            pointer-events: none;
+            transition: color 0.25s ease;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            background-color: var(--input-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 13px 16px 13px 46px;
+            color: var(--text-main);
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+            appearance: none;
+        }
+
+        .form-group select { cursor: pointer; }
+        .form-group select option { background-color: #0b1120; color: #ffffff; }
+        .form-group input::placeholder { color: #4b5563; }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px var(--accent-cyan-glow);
+        }
+
+        .input-wrapper:focus-within i {
+            color: var(--accent-cyan);
+        }
+
+        /* Submit Buttons */
+        .submit-btn {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 14px;
+            padding: 15px;
+            font-size: 14.5px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 8px 25px rgba(3, 105, 161, 0.4);
+            transition: all 0.25s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+            box-shadow: 0 12px 30px rgba(56, 189, 248, 0.45);
+        }
+
+        .submit-btn:active { transform: translateY(0); }
+
+        .mentor-btn-theme {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 8px 25px var(--accent-emerald-glow);
+        }
+
+        .mentor-btn-theme:hover {
+            background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+            box-shadow: 0 12px 30px rgba(52, 211, 153, 0.45);
+        }
+
+        .ultra-transfer-btn {
+            background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
+            box-shadow: 0 8px 25px var(--accent-purple-glow);
+        }
+
+        .ultra-transfer-btn:hover {
+            background: linear-gradient(135deg, #c084fc 0%, #a855f7 100%);
+            box-shadow: 0 12px 30px rgba(192, 132, 252, 0.45);
+        }
+
+        .divider { height: 1px; background: var(--glass-border); margin: 4px 0; }
+
+        /* DASHBOARD MODULE CARDS */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            width: 100%;
+            margin-top: 6px;
+        }
+
+        .dash-btn {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 32px 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            color: var(--text-main);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dash-btn i {
+            width: 38px;
+            height: 38px;
+            transition: transform 0.3s ease;
+        }
+
+        .dash-btn span {
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+        }
+
+        /* 🎓 MENTOR BUTTON DEDICATED STYLING */
+        .dash-btn-mentor {
+            border-color: rgba(16, 185, 129, 0.35);
+            background: linear-gradient(145deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.03) 100%);
+        }
+
+        .dash-btn-mentor i { color: #34d399; }
+
+        .dash-btn-mentor:hover {
+            border-color: #34d399;
+            background: linear-gradient(145deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.08) 100%);
+            box-shadow: 0 12px 35px rgba(52, 211, 153, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .dash-btn-mentor:hover i { transform: scale(1.15) rotate(5deg); }
+
+        /* TRANSFER BUTTON */
+        .dash-btn-transfer {
+            border-color: rgba(192, 132, 252, 0.35);
+            background: linear-gradient(145deg, rgba(168, 85, 247, 0.08) 0%, rgba(56, 189, 248, 0.03) 100%);
+        }
+
+        .dash-btn-transfer i { color: #c084fc; }
+
+        .dash-btn-transfer:hover {
+            border-color: #c084fc;
+            background: linear-gradient(145deg, rgba(168, 85, 247, 0.2) 0%, rgba(56, 189, 248, 0.08) 100%);
+            box-shadow: 0 12px 35px rgba(192, 132, 252, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .dash-btn-transfer:hover i { transform: scale(1.15) rotate(-5deg); }
+
+        /* INTERVIEW BUTTON */
+        .dash-btn-interview { 
+            border-color: rgba(244, 63, 94, 0.35);
+            background: linear-gradient(145deg, rgba(244, 63, 94, 0.08) 0%, rgba(225, 29, 72, 0.03) 100%);
+        }
+        .dash-btn-interview i { color: #f43f5e; }
+        .dash-btn-interview:hover {
+            background: linear-gradient(145deg, rgba(244, 63, 94, 0.2) 0%, rgba(225, 29, 72, 0.08) 100%);
+            border-color: #f43f5e;
+            box-shadow: 0 12px 35px rgba(244, 63, 94, 0.3);
+            transform: translateY(-5px);
+        }
+
+        /* Preset Chips */
+        .template-presets {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .preset-chip {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .preset-chip:hover {
+            background: rgba(56, 189, 248, 0.12);
+            border-color: rgba(56, 189, 248, 0.4);
+            color: var(--accent-cyan);
+        }
+
+        /* GENERATED PAYLOAD COMMAND CARDS */
+        .sections-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .section-card {
+            background: rgba(5, 9, 20, 0.85);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: border-color 0.25s ease;
+        }
+
+        .section-card:hover {
+            border-color: rgba(56, 189, 248, 0.35);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title {
+            font-size: 12.5px;
+            font-weight: 800;
+            color: var(--accent-cyan);
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-code-box {
+            background: rgba(0, 0, 0, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #f3f4f6;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        /* INDIVIDUAL COPY BUTTON */
+        .single-copy-btn {
+            background: rgba(52, 211, 153, 0.12);
+            border: 1px solid rgba(52, 211, 153, 0.4);
+            color: #34d399;
+            border-radius: 10px;
+            padding: 7px 14px;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .single-copy-btn:hover {
+            background: #34d399;
+            color: #000000;
+            box-shadow: 0 0 15px rgba(52, 211, 153, 0.4);
+        }
+
+        .single-copy-btn:active { transform: scale(0.95); }
+
+        .copy-all-master-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 14px;
+            padding: 15px;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 8px 25px var(--accent-emerald-glow);
+            transition: all 0.25s ease;
+        }
+
+        .copy-all-master-btn:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+            box-shadow: 0 12px 30px rgba(52, 211, 153, 0.5);
+        }
+
+        /* CHECKLIST PAGE */
+        .checklist-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: rgba(5, 9, 20, 0.8);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 16px 20px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.25s ease;
+        }
+
+        .checklist-item:hover {
+            background: rgba(56, 189, 248, 0.05);
+            border-color: rgba(56, 189, 248, 0.3);
+        }
+
+        .checklist-checkbox {
+            width: 24px;
+            height: 24px;
+            border-radius: 7px;
+            border: 2px solid #4b5563;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .checklist-checkbox i {
+            opacity: 0;
+            transform: scale(0.4);
+            transition: all 0.2s ease;
+            color: #000000;
+            width: 15px;
+            height: 15px;
+            stroke-width: 3px;
+        }
+
+        .checklist-item.checked {
+            background: rgba(52, 211, 153, 0.08);
+            border-color: rgba(52, 211, 153, 0.4);
+        }
+
+        .checklist-item.checked .checklist-checkbox {
+            background: #34d399;
+            border-color: #34d399;
+        }
+
+        .checklist-item.checked .checklist-checkbox i {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .checklist-item.checked .checklist-label {
+            color: #34d399;
+            text-decoration: line-through;
+            opacity: 0.85;
+        }
+
+        .checklist-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: #f3f4f6;
+        }
+
+        .dashboard-unlock-btn {
+            background: var(--glass-border);
+            color: #6b7280;
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 16px;
+            font-size: 14.5px;
+            font-weight: 800;
+            cursor: not-allowed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            transition: all 0.3s ease;
+            opacity: 0.5;
+        }
+
+        .dashboard-unlock-btn.unlocked {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            opacity: 1;
+            box-shadow: 0 8px 25px var(--accent-emerald-glow);
+        }
+
+        .dashboard-unlock-btn.unlocked:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+        }
+
+        /* INTERVIEW NOTICE STYLING */
+        .interview-banner {
+            background: rgba(244, 63, 94, 0.1);
+            border: 1px solid rgba(244, 63, 94, 0.3);
+            border-radius: 20px;
+            padding: 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .interview-banner-badge {
+            background: rgba(244, 63, 94, 0.2);
+            color: #f43f5e;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+
+        .interview-message-main {
+            font-size: 16px;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+
+        .interview-message-sub {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #fda4af;
+        }
+
+        .interview-signature {
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--accent-cyan);
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Toast Notifications */
+        .copy-toast {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+            padding: 13px 22px;
+            border-radius: 14px;
+            font-weight: 800;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+            transform: translateY(-100px);
+            opacity: 0;
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 100;
+        }
+
+        .copy-toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .back-btn {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 12.5px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s ease;
+        }
+
+        .back-btn:hover {
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .dev-mode-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 11px;
+            border-radius: 12px;
+            font-size: 12.5px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.25s ease;
+        }
+
+        .dev-mode-btn:hover {
+            background: rgba(56, 189, 248, 0.08);
+            border-color: rgba(56, 189, 248, 0.35);
+            color: var(--accent-cyan);
+        }
+
+        .admin-btn {
+            background: transparent;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: var(--accent-gold);
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.25s ease;
+        }
+
+        .admin-btn:hover {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: rgba(245, 158, 11, 0.6);
+        }
+
+        .version-badge {
+            position: fixed;
+            bottom: 18px;
+            left: 18px;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-muted);
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 7px 14px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 20;
+        }
+
+        @media (max-width: 640px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .form-grid-2 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-grid"></div>
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+
+    <!-- Notification Toast -->
+    <div class="copy-toast" id="toast">
+        <i data-lucide="check-circle-2"></i>
+        <span id="toast-message">Copied to Clipboard!</span>
+    </div>
+
+    <!-- 1. LOGIN / REGISTER VIEW -->
+    <div class="view active" id="register-view">
+        <div class="card-wrapper">
+            <div class="card">
+                <div class="icon-container">
+                    <div class="icon-box">🧸</div>
+                </div>
+                <div class="header-text">
+                    <div class="subtitle"><span class="subtitle-dot"></span> Administration Portal</div>
+                    <h1 class="title">Reign RP Administration Team</h1>
+                    <p class="description">Enter authorized staff credentials to open the helpful dashboard.</p>
+                </div>
+                <button class="dev-mode-btn">
+                    <i data-lucide="code-2"></i>
+                    <span>Activate Administration Team</span>
+                </button>
+                <form class="form-container" onsubmit="handleRegistration(event)">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="username" placeholder="Staff Username" autocomplete="off" required>
+                            <i data-lucide="user"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="password" placeholder="••••••••••••" required>
+                            <i data-lucide="lock"></i>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        <span>Authenticate Portal</span>
+                        <i data-lucide="arrow-right" style="width: 17px; height: 17px;"></i>
+                    </button>
+                </form>
+                <div class="divider"></div>
+                <button class="admin-btn">
+                    <i data-lucide="shield-alert" style="width: 17px; height: 17px;"></i>
+                    <span>Admin</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. MAIN DASHBOARD VIEW -->
+    <div class="view" id="dashboard-view">
+        <div class="dashboard-wrapper">
+            <div class="card">
+                <div class="icon-container">
+                    <div class="icon-box">⚡</div>
+                </div>
+                <div class="header-text">
+                    <div class="subtitle"><span class="subtitle-dot"></span> Control Center</div>
+                    <h1 class="title" id="welcome-title">Control Hub</h1>
+                    <p class="description">Select a management module to execute Discord staff operations.</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- 📝 INTERVIEW BUTTON PAGE ACCESS -->
+                    <button class="dash-btn dash-btn-interview" onclick="openInterviewPage()">
+                        <i data-lucide="clipboard-x"></i>
+                        <span>INTERVIEW</span>
+                    </button>
+
+                    <!-- 🎓 MENTOR BUTTON PAGE ACCESS -->
+                    <button class="dash-btn dash-btn-mentor" onclick="openMentorPage()">
+                        <i data-lucide="graduation-cap"></i>
+                        <span>MENTOR</span>
+                    </button>
+
+                    <!-- 🚀 TRANSFER BUTTON PAGE ACCESS -->
+                    <button class="dash-btn dash-btn-transfer" onclick="openTransferPage()">
+                        <i data-lucide="zap"></i>
+                        <span>TRANSFER</span>
+                    </button>
+                </div>
+
+                <button class="back-btn" onclick="logout()" style="margin: 0 auto;">
+                    <i data-lucide="log-out" style="width: 14px; height: 14px;"></i>
+                    <span>Sign Out</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. INTERVIEW PAGE (MODERN NOTICE) -->
+    <div class="view" id="interview-view">
+        <div class="form-wrapper" style="max-width: 680px;">
+            <div class="card">
+                <div class="icon-container">
+                    <div class="icon-box" style="border-color: rgba(244, 63, 94, 0.4); background: rgba(244, 63, 94, 0.15);">🚫</div>
+                </div>
+                <div class="header-text">
+                    <div class="subtitle" style="color: var(--accent-red);"><span class="subtitle-dot" style="background-color: var(--accent-red);"></span> Module Inactive</div>
+                    <h1 class="title">Interview Module</h1>
+                </div>
+
+                <div class="interview-banner">
+                    <div class="interview-banner-badge">NOT IN USE</div>
+                    <div class="interview-message-main">
+                        THIS INTERVIEW SECTION SHOULD BE DONE ON THE INTERVIEW SPREADSHEET.
+                    </div>
+                    <div class="interview-message-sub">
+                        NEVER USE THE INTERVIEW PAGE. ONLY USE MENTOR AND TRANSFER.
+                    </div>
+                    <div class="interview-signature">
+                        <i data-lucide="pen-tool" style="width: 16px; height: 16px;"></i>
+                        <span>THANK YOU! Signed by jayden</span>
+                    </div>
+                </div>
+
+                <button class="back-btn" onclick="backToDashboard()" style="margin: 0 auto;">
+                    <i data-lucide="arrow-left" style="width: 14px; height: 14px;"></i>
+                    <span>Back to Core Dashboard</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. MENTOR PAGE FORM -->
+    <div class="view" id="mentor-view">
+        <div class="form-wrapper">
+            <div class="card">
+                <div class="icon-container">
+                    <div class="icon-box" style="border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.15);">🎓</div>
+                </div>
+                <div class="header-text">
+                    <div class="subtitle" style="color: var(--accent-emerald);"><span class="subtitle-dot" style="background-color: var(--accent-emerald);"></span> Staff Onboarding</div>
+                    <h1 class="title">Mentor Team Placement</h1>
+                    <p class="description">Generate exact team assignment and role commands for new staff recruits.</p>
+                </div>
+
+                <div class="template-presets">
+                    <span class="preset-chip" onclick="fillMentorPreset('Sam', '987654321098765432', '1042', 'Factions Team')">Sample Recruiter</span>
+                    <span class="preset-chip" onclick="fillMentorPreset('Morgan', '456123789012345678', '2088', 'Screenshare Team')">Sample Mentee</span>
+                </div>
+
+                <form class="form-container" onsubmit="handleMentorSubmit(event)">
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="mentor-name">Their Name</label>
+                            <div class="input-wrapper">
+                                <input type="text" id="mentor-name" placeholder="Member Name" autocomplete="off" required>
+                                <i data-lucide="user-check"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mentor-discord-id">Their Discord ID</label>
+                            <div class="input-wrapper">
+                                <input type="text" id="mentor-discord-id" placeholder="18-digit Discord ID" autocomplete="off" required>
+                                <i data-lucide="hash"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="mentor-id">Their ID</label>
+                            <div class="input-wrapper">
+                                <input type="text" id="mentor-id" placeholder="Staff ID (e.g. 1042)" autocomplete="off" required>
+                                <i data-lucide="badge-check"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mentor-team-going">Team Going To</label>
+                            <div class="input-wrapper">
+                                <select id="mentor-team-going" required>
+                                    <option value="" disabled selected>Select Target Team</option>
+                                    <option value="Factions Team">Factions Team</option>
+                                    <option value="Interactions Team">Interactions Team</option>
+                                    <option value="Screenshare Team">Screenshare Team</option>
+                                    <option value="Order Team">Order Team</option>
+                                    <option value="Support Team">Support Team</option>
+                                    <option value="War Team">War Team</option>
+                                    <option value="Administration Team">Administration Team</option>
+                                </select>
+                                <i data-lucide="shield"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn mentor-btn-theme">
+                        <span>Generate Mentor Commands</span>
+                        <i data-lucide="arrow-right" style="width: 18px; height: 18px;"></i>
+                    </button>
+                </form>
+
+                <button class="back-btn" onclick="backToDashboard()" style="margin: 0 auto;">
+                    <i data-lucide="arrow-left" style="width: 14px; height: 14px;"></i>
+                    <span>Back to Core Dashboard</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. TRANSFER PAGE FORM -->
+    <div class="view" id="transfer-view">
+        <div class="form-wrapper">
+            <div class="card">
+                <div class="icon-container">
+                    <div class="icon-box" style="border-color: rgba(192, 132, 252, 0.4); background: rgba(168, 85, 247, 0.15);">🔄</div>
+                </div>
+                <div class="header-text">
+                    <div class="subtitle" style="color: var(--accent-purple);"><span class="subtitle-dot" style="background-color: var(--accent-purple);"></span> Department Transfer</div>
+                    <h1 class="title">Staff Transfer Engine</h1>
+                    <p class="description">Generate discord role swap commands for staff changing departments.</p>
+                </div>
+
+                <div class="template-presets">
+                    <span class="preset-chip" onclick="fillTransferPreset('Alex', '987654321098765432', '1042', 'Factions Team')">Quick Preset 1</span>
+                    <span class="preset-chip" onclick="fillTransferPreset('Jordan', '456123789012345678', '2088', 'Screenshare Team')">Quick Preset 2</span>
+                </div>
+
+                <form class="form-container" onsubmit="handleTransferSubmit(event)">
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="transfer-name">Member Name</label>
+                            <div class="input-wrapper">
+                                <input type="text" id="transfer-name" placeholder="Member Name" autocomplete="off" required>
+                                <i data-lucide="user-check"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="transfer-discord-id">Discord ID</label>
+                            <div class="input-wrapper">
+                                <input type="text" id="transfer-discord-id" placeholder="18-digit Discord ID" autocomplete="off" required>
+                                <i data-lucide="hash"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="transfer-id">Staff ID</label>
+                            <div class="input-wrapper">
+                                <input type="text" id="transfer-id" placeholder="e.g. 1042" autocomplete="off" required>
+                                <i data-lucide="badge-check"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="transfer-team-leaving">Originating Team</label>
+                            <div class="input-wrapper">
+                                <select id="transfer-team-leaving" required>
+                                    <option value="" disabled selected>Select Originating Department</option>
+                                    <option value="Factions Team">Factions Team</option>
+                                    <option value="Screenshare Team">Screenshare Team</option>
+                                    <option value="Interactions Team">Interactions Team</option>
+                                    <option value="Order Team">Order Team</option>
+                                    <option value="Support Team">Support Team</option>
+                                    <option value="War Team">War Team</option>
+                                    <option value="Administration Team">Administration Team</option>
+                                </select>
+                                <i data-lucide="layers"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn ultra-transfer-btn">
+                        <span>Generate Transfer Commands</span>
+                        <i data-lucide="arrow-right-left" style="width: 18px; height: 18px;"></i>
+                    </button>
+                </form>
+
+                <button class="back-btn" onclick="backToDashboard()" style="margin: 0 auto;">
+                    <i data-lucide="arrow-left" style="width: 14px; height: 14px;"></i>
+                    <span>Back to Core Dashboard</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. GENERATED COMMAND OUTPUT VIEW -->
+    <div class="view" id="output-view">
+        <div class="output-wrapper">
+            <div class="card">
+                <div class="icon-container">
+                    <div class="icon-box">📋</div>
+                </div>
+
+                <div class="header-text">
+                    <div class="subtitle"><span class="subtitle-dot"></span> Generated Commands</div>
+                    <h1 class="title" id="output-team-title">Command Blocks</h1>
+                    <p class="description">Copy individual command boxes or use the master button to copy everything at once.</p>
+                </div>
+
+                <button class="copy-all-master-btn" onclick="copyAllSections()">
+                    <i data-lucide="copy-check" style="width: 18px; height: 18px;"></i>
+                    <span>Copy All Command Sections At Once</span>
+                </button>
+
+                <div class="sections-list" id="sections-container"></div>
+
+                <div class="divider" style="margin: 4px 0;"></div>
+
+                <button class="submit-btn" onclick="proceedToChecklist()" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">
+                    <span>Proceed To Execution Checklist</span>
+                    <i data-lucide="check-square" style="width: 18px; height: 18px;"></i>
+                </button>
+
+                <button class="back-btn" id="output-back-btn" onclick="backToLastForm()" style="margin: 0 auto;">
+                    <i data-lucide="arrow-left" style="width: 14px; height: 14px;"></i>
+                    <span>Edit Form Details</span>
+                </button>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. CHECKLIST VERIFICATION PAGE -->
+    <div class="view" id="checklist-view">
+        <div class="output-wrapper">
+            <div class="card">
+                <div class="icon-container">
+                    <div class="icon-box">✅</div>
+                </div>
+
+                <div class="header-text">
+                    <div class="subtitle"><span class="subtitle-dot"></span> Execution Audit</div>
+                    <h1 class="title">Confirmation Checklist</h1>
+                    <p class="description">Click every item below after completing actions in Discord.</p>
+                </div>
+
+                <div class="checklist-container">
+                    <div class="checklist-item" onclick="toggleChecklist(this)">
+                        <div class="checklist-checkbox"><i data-lucide="check"></i></div>
+                        <span class="checklist-label">Updated Staff Control Channel Details</span>
+                    </div>
+
+                    <div class="checklist-item" onclick="toggleChecklist(this)">
+                        <div class="checklist-checkbox"><i data-lucide="check"></i></div>
+                        <span class="checklist-label">Executed Role Add / Remove Commands in Discord</span>
+                    </div>
+
+                    <div class="checklist-item" onclick="toggleChecklist(this)">
+                        <div class="checklist-checkbox"><i data-lucide="check"></i></div>
+                        <span class="checklist-label">Applied Name Change Format to Member</span>
+                    </div>
+
+                    <div class="checklist-item" onclick="toggleChecklist(this)">
+                        <div class="checklist-checkbox"><i data-lucide="check"></i></div>
+                        <span class="checklist-label">Logged Event in Audit Channel</span>
+                    </div>
+                </div>
+
+                <button class="dashboard-unlock-btn" id="finish-checklist-btn" onclick="returnToDashboardFromChecklist()">
+                    <i data-lucide="lock" id="unlock-btn-icon" style="width: 18px; height: 18px;"></i>
+                    <span id="unlock-btn-text">Check All Tasks to Return to Dashboard</span>
+                </button>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="version-badge">
+        <i data-lucide="shield-check" style="width: 13px; height: 13px; color: var(--accent-cyan);"></i>
+        <span>Administration Portal • Complete V2.0</span>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        let activeSourcePage = 'mentor';
+        let generatedBlocks = {};
+
+        // MENTOR DATA TEMPLATES
+        const mentorTemplates = {
+            "Factions Team": (name, discordId, id) => ({
+                "Staff Control": `Name: ${discordId}\nOld Folder: <@&1550658928201961525>\nNew Folder: <@&1550658897856036954>\nRank: <@&1550658892566896671>\n<@&1550658883939344434> <@&1550676367413354556> <@&1550658861612933190> <@&1550658921549664327> <@&1550658896639823892>`,
+                "Role Add/Remove": `!remcargo @┋Staff Trainee ${discordId}\n!addcargo @⚔️┋Factions  Team ${discordId}\n!addcargo @┋Moderator ${discordId}`,
+                "Name Change": `FACTIONS | ⚔️${name} | ${id}`
+            }),
+            "Screenshare Team": (name, discordId, id) => ({
+                "Staff Control": `Name: <@${discordId}>\nOld Folder: <@&1550658928201961525>\nNew Folder: <@&1550658920308023397>\nRank: <@&1550658892566896671>\n<@&1550658872040104027> <@&1550658846706507796> <@&1550658917611216918>`,
+                "Role Add/Remove": `!remcargo @┋Staff Trainee ${discordId}\n!addcargo @👻┋ScreenShare Team ${discordId}\n!addcargo @┋Moderator ${discordId}`,
+                "Name Change": `SM |👻${name} | ${id}`
+            }),
+            "Interactions Team": (name, discordId, id) => ({
+                "Staff Control": `Name: <@${discordId}>\nOld Folder: <@&1550658928201961525>\nNew Folder: <@&1550658906466820196>\nRank: <@&1550658893800144957>\n<@&1550658883939344434> <@&1550676367413354556> <@&1550658861612933190> <@&1550658921549664327> <@&1550658905082691635>`,
+                "Role Add/Remove": `!remcargo @┋Staff Trainee ${discordId}\n!addcargo @🎉┋ Interactions Team ${discordId}\n!addcargo @┋Support ${discordId}`,
+                "Name Change": `INT |🎉${name} | ${id}`
+            }),
+            "Order Team": (name, discordId, id) => ({
+                "Staff Control": `Name: <@${discordId}>\nOld Folder: <@&1550658928201961525>\nNew Folder: <@&1550658912863264832>\nRank: <@&1550658892566896671>\n<@&1550658883939344434> <@&1550676367413354556> <@&1550658861612933190> <@&1550658921549664327> <@&1550658912863264832>`,
+                "Role Add/Remove": `!remcargo @┋Staff Trainee ${discordId}\n!addcargo @👾┋Order Team ${discordId}\n!addcargo @┋Moderator ${discordId}`,
+                "Name Change": `ORD |👾${name} | ${id}`
+            }),
+            "Support Team": (name, discordId, id) => ({
+                "Staff Control": `Name: <@${discordId}>\nOld Folder: <@&1550658928201961525>\nNew Folder: <@&1550658911080681562>\nRank: <@&1550658893800144957>\n<@&1550658883939344434> <@&1550676367413354556> <@&1550658861612933190> <@&1550658921549664327> <@&1550658910023712858>`,
+                "Role Add/Remove": `!addcargo @📞┋Support Team ${discordId}\n!addcargo @┋Support ${discordId}\n!remcargo @┋Staff Trainee ${discordId}`,
+                "Name Change": `MOD |📞${name} | ${id}`
+            }),
+            "War Team": (name, discordId, id) => ({
+                "Staff Control": `Name: <@${discordId}>\nOld Folder: <@&1550658928201961525>\nNew Folder: <@&1550658908194873474>\nRank: <@&1550658892566896671>\n<@&1550658883939344434> <@&1550676367413354556> <@&1550658861612933190> <@&1550658921549664327> <@&1550658907309998170> <@&1550658875743674458>`,
+                "Role Add/Remove": `!addcargo @🔫┋War Team ${discordId}\n!remcargo @┋Staff Trainee ${discordId}\n!addcargo @┋Moderator ${discordId}`,
+                "Name Change": `WAR |🔫${name} | ${id}`
+            }),
+            "Administration Team": (name, discordId, id) => ({
+                "Staff Control": `Name: <@${discordId}>\nOld Folder: <@&1550658928201961525>\nNew Folder: <@&1550658922199654501>\nRank: <@&1550658892566896671>\n<@&1550658883939344434> <@&1550676367413354556> <@&1550658861612933190> <@&1550658921549664327>`,
+                "Role Add/Remove": `!remcargo @┋Staff Trainee ${discordId}\n!addcargo @┋Moderator ${discordId}\n!addcargo @🧸┋Administration Team ${discordId}`,
+                "Name Change": `MOD |🧸${name} | ${id}`
+            })
+        };
+
+        // TRANSFER DATA TEMPLATES
+        const transferTemplates = {
+            "Factions Team": (name, discordId, id) => ({
+                "Staff Control": `Name: <@${discordId}>\nOld Folder: <@&1550658897856036954>\nNew Folder: <@&1550658928201961525>\nRank: <@&1550658893800144957>\n<@&1550658883939344434> <@&1550676367413354556> <@&1550658861612933190> <@&1550658921549664327> <@&1550658896639823892>`,
+                "Role Add/Remove": `!addcargo @┋Staff Trainee ${discordId}\n!remcargo @⚔️┋Factions Team ${discordId}\n!remcargo @⚔️️┋Factions Leader ${discordId}`,
+                "Name Change": `TN | ${name} | ${id}`
+            }),
+            "Screenshare Team": (name, discordId, id) => ({
+                "Staff Control": `Name: ${discordId}\nOld Folder: <@&1550658920308023397>\nNew Folder: <@&1550658928201961525>\nRank: <@&1550658893800144957>\n<@&1550658883939344434> <@&1550676367413354556> <@&1550658861612933190> <@&1550658921549664327> <@&1550658872040104027>`,
+                "Role Add/Remove": `!remcargo @👻┋ScreenShare Team ${discordId}\n!remcargo @┋Moderator ${discordId}\n!addcargo @┋Support ${discordId}\n!addcargo @┋Staff Trainee ${discordId}`,
+                "Name Change": `TN | ${name} | ${id}`
+            }),
+            "Interactions Team": (name, discordId, id) => ({
+                "Staff Control": `Name: ${discordId}\nOld Folder: <@&1550658906466820196>\nNew Folder: <@&1550658928201961525>\nRank: <@&1550658893800144957>\n<@&1550658883939344434> <@&1550676367413354556> <@&1550658861612933190> <@&1550658921549664327> <@&1550658905082691635>`,
+                "Role Add/Remove": `!addcargo @┋Staff Trainee ${discordId}\n!addcargo @┋Support ${discordId}\n!addcargo @🎉┋ Interactions Team ${discordId}\n!addcargo @🎉┋ Interactions Leader ${discordId}`,
+                "Name Change": `TN | ${name} | ${id}`
+            }),
+            "Order Team": (name, discordId, id) => ({
+                "Staff Control": `Name: ${discordId}\nOld Folder: <@&1550658912863264832>\nNew Folder: <@&1550658928201961525>\nRank: <@&1550658893800144957>\n<@&1550658883939344434> <@&1550676367413354556> <@&1550658861612933190> <@&1550658921549664327> <@&1550658876523683881> <@&1550658911676276757>`,
+                "Role Add/Remove": `!addcargo @┋Staff Trainee ${discordId}\n!addcargo @┋Support ${discordId}\n!remcargo @👾┋Order Team ${discordId}\n!remcargo @👾┋Order Leader ${discordId}`,
+                "Name Change": `TN | ${name} | ${id}`
+            }),
+            "Support Team": (name, discordId, id) => ({
+                "Staff Control": `Name: ${discordId}\nOld Folder: <@&1550658911080681562>\nNew Folder: <@&1550658928201961525>\nRank: <@&1550658893800144957>\n<@&1550658883939344434> <@&1550676367413354556> <@&1550658861612933190> <@&1550658921549664327> <@&1550658910023712858>`,
+                "Role Add/Remove": `!addcargo @┋Staff Trainee ${discordId}\n!addcargo @┋Support ${discordId}\n!remcargo @📞┋Support Team ${discordId}\n!remcargo @📞┋Support Leader ${discordId}`,
+                "Name Change": `TN | ${name} | ${id}`
+            }),
+            "War Team": (name, discordId, id) => ({
+                "Staff Control": `Name: ${discordId}\nOld Folder: <@&1550658908194873474>\nNew Folder: <@&1550658928201961525>\nRank: <@&1550658893800144957>\n<@&1550658883939344434> <@&1550676367413354556> <@&1550658861612933190> <@&1550658921549664327> <@&1550658907309998170>`,
+                "Role Add/Remove": `!addcargo @┋Staff Trainee ${discordId}\n!addcargo @┋Support ${discordId}\n!remcargo @🔫┋War Team ${discordId}\n!remcargo @🔫┋War Leader ${discordId}`,
+                "Name Change": `TN | ${name} | ${id}`
+            }),
+            "Administration Team": (name, discordId, id) => ({
+                "Staff Control": `Name: ${discordId}\nOld Folder: <@&1550658922199654501>\nNew Folder: <@&1550658928201961525>\nRank: <@&1550658893800144957>\n<@&1550658883939344434> <@&1550676367413354556> <@&1550658861612933190> <@&1550658921549664327>`,
+                "Role Add/Remove": `!addcargo @┋Staff Trainee ${discordId}\n!addcargo @┋Support ${discordId}\n!remcargo @🧸┋Administration Team ${discordId}\n!remcargo @🧸┋Administration Leader ${discordId}`,
+                "Name Change": `TN | ${name} | ${id}`
+            })
+        };
+
+        function switchView(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+
+        function handleRegistration(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            document.getElementById('welcome-title').textContent = `Welcome, ${username}`;
+            switchView('dashboard-view');
+        }
+
+        function openInterviewPage() { switchView('interview-view'); }
+        function openMentorPage() { switchView('mentor-view'); }
+        function openTransferPage() { switchView('transfer-view'); }
+        function backToDashboard() { switchView('dashboard-view'); }
+        function logout() { switchView('register-view'); }
+
+        function fillMentorPreset(name, discordId, id, team) {
+            document.getElementById('mentor-name').value = name;
+            document.getElementById('mentor-discord-id').value = discordId;
+            document.getElementById('mentor-id').value = id;
+            document.getElementById('mentor-team-going').value = team;
+        }
+
+        function fillTransferPreset(name, discordId, id, team) {
+            document.getElementById('transfer-name').value = name;
+            document.getElementById('transfer-discord-id').value = discordId;
+            document.getElementById('transfer-id').value = id;
+            document.getElementById('transfer-team-leaving').value = team;
+        }
+
+        function handleMentorSubmit(e) {
+            e.preventDefault();
+            activeSourcePage = 'mentor';
+            const name = document.getElementById('mentor-name').value.trim();
+            const discordId = document.getElementById('mentor-discord-id').value.trim();
+            const id = document.getElementById('mentor-id').value.trim();
+            const teamGoing = document.getElementById('mentor-team-going').value;
+
+            if (mentorTemplates[teamGoing]) {
+                generatedBlocks = mentorTemplates[teamGoing](name, discordId, id);
+                renderOutputBlocks(`Mentor Placement: ${teamGoing}`);
+            }
+        }
+
+        function handleTransferSubmit(e) {
+            e.preventDefault();
+            activeSourcePage = 'transfer';
+            const name = document.getElementById('transfer-name').value.trim();
+            const discordId = document.getElementById('transfer-discord-id').value.trim();
+            const id = document.getElementById('transfer-id').value.trim();
+            const teamLeaving = document.getElementById('transfer-team-leaving').value;
+
+            if (transferTemplates[teamLeaving]) {
+                generatedBlocks = transferTemplates[teamLeaving](name, discordId, id);
+                renderOutputBlocks(`Transfer: ${teamLeaving}`);
+            }
+        }
+
+        function renderOutputBlocks(titleHeader) {
+            document.getElementById('output-team-title').textContent = titleHeader;
+            const container = document.getElementById('sections-container');
+            container.innerHTML = '';
+
+            Object.entries(generatedBlocks).forEach(([title, text]) => {
+                const card = document.createElement('div');
+                card.className = 'section-card';
+                card.innerHTML = `
+                    <div class="section-header">
+                        <span class="section-title"><i data-lucide="terminal" style="width: 14px; height: 14px;"></i> ${title}</span>
+                        <button class="single-copy-btn" onclick="copySingleBlock(\`${text.replace(/`/g, '\\`')}\`, '${title}')">
+                            <i data-lucide="copy" style="width: 13px; height: 13px;"></i> Copy Block
+                        </button>
+                    </div>
+                    <div class="section-code-box">${text}</div>
+                `;
+                container.appendChild(card);
+            });
+
+            lucide.createIcons();
+            switchView('output-view');
+        }
+
+        function backToLastForm() {
+            if (activeSourcePage === 'mentor') switchView('mentor-view');
+            else switchView('transfer-view');
+        }
+
+        function copySingleBlock(text, label) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast(`Copied ${label}!`);
+            });
+        }
+
+        function copyAllSections() {
+            const combined = Object.entries(generatedBlocks)
+                .map(([title, val]) => `=== ${title.toUpperCase()} ===\n${val}`)
+                .join('\n\n');
+            
+            navigator.clipboard.writeText(combined).then(() => {
+                showToast(`Copied ALL Sections!`);
+            });
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        function proceedToChecklist() {
+            document.querySelectorAll('.checklist-item').forEach(item => item.classList.remove('checked'));
+            updateChecklistStatus();
+            switchView('checklist-view');
+        }
+
+        function toggleChecklist(el) {
+            el.classList.toggle('checked');
+            updateChecklistStatus();
+        }
+
+        function updateChecklistStatus() {
+            const total = document.querySelectorAll('.checklist-item').length;
+            const checked = document.querySelectorAll('.checklist-item.checked').length;
+            const btn = document.getElementById('finish-checklist-btn');
+            const icon = document.getElementById('unlock-btn-icon');
+            const text = document.getElementById('unlock-btn-text');
+
+            if (checked === total) {
+                btn.classList.add('unlocked');
+                icon.setAttribute('data-lucide', 'arrow-right');
+                text.textContent = 'Return to Core Dashboard';
+            } else {
+                btn.classList.remove('unlocked');
+                icon.setAttribute('data-lucide', 'lock');
+                text.textContent = `Check All Tasks (${checked}/${total})`;
+            }
+            lucide.createIcons();
+        }
+
+        function returnToDashboardFromChecklist() {
+            const total = document.querySelectorAll('.checklist-item').length;
+            const checked = document.querySelectorAll('.checklist-item.checked').length;
+            if (checked === total) switchView('dashboard-view');
+        }
+    </script>
+</body>
+</html>
